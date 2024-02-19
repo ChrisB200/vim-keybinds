@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdbool.h>
 
 #define MAX_BIND_LENGTH 100
 #define MAX_DESCRIPTION_LENGTH 200
@@ -217,14 +218,59 @@ Category *init_category_head()
     return head;
 }
 
-void input_bind(Keybind *head)
+Category *input_category(Category *head)
+{
+    char name[MAX_CATEGORY_LENGTH];
+
+    printf("What is the name of the category? ");
+    scanf("%s", name);
+
+    Category *category = create_category(name);
+    append_category(head, category);
+
+    printf("Successfully created the category: %s\n", category->name);
+
+    return category;
+}
+
+void input_bind(Keybind *head, Category *categoryHead)
 {
     char bind[MAX_BIND_LENGTH];
     char description[MAX_DESCRIPTION_LENGTH];
-    char category[MAX_CATEGORY_LENGTH];
+    Category *category;
+
+    char choice;
+    bool exit = false;
 
     printf("What is the keybind? ");
+    scanf("%s", bind);
+
+    printf("What is the description? ");
+    scanf("%s", description);
+    
+    do
+    {
+        printf("Are you using an existing category? (y/n) ");
+        scanf(" %c", &choice);
+
+        switch (tolower(choice))
+        {
+            // NEED TO ADD MORE TO THIS CASE STATEMENT
+            case 'y':
+                display_categories(categoryHead);
+                exit = true;
+                break;
+            case 'n':
+                category = input_category(categoryHead);
+                Keybind *newKeybind = create_bind(bind, description, category);
+                append_bind(head, newKeybind);
+                printf("Successfully created a new key bind");
+                exit = true;
+                break;
+        }
+    } while (exit != true);
 }
+
 
 // Main function
 int main()
@@ -232,6 +278,37 @@ int main()
     // Create head nodes
     Keybind *keybindHead = init_keybind_head();
     Category *categoryHead = init_category_head();
+
+    // Program loop
+    bool run = true;
+
+    do
+    {
+        char choice;
+        printf("d: display binds\nr: display categories\na: add bind\nc: add category\nq: quit\n");
+        scanf(" %c", &choice);
+
+        switch (tolower(choice))
+        {
+            case 'a':
+                input_bind(keybindHead, categoryHead);
+                break;
+
+            case 'd':
+                break;
+
+            case 'r':
+                break;
+
+            case 'c':
+                break;
+
+            case 'q':
+                run = false;
+                break;
+
+        }
+    } while(run == true);
 
     // Frees all the memory used up by the keybinds linked list
     free_keybind_list(keybindHead);
